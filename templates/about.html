@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- SRIKANTH CHELLURI, NIKHIL GUPTA -->
+    
+    {% load staticfiles %}
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="An intuitive way to schedule.">
+        <meta name="author" content="Srikanth Chelluri, Nikhil Gupta">
+        <link rel="icon" href="{% static "favicon/favicon.ico" %}">
+        
+        <title>uva schedule | about</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="{% static "css/bootstrap.css" %}" rel="stylesheet">
+        <!-- Bootstrap style CSS -->
+        <link href="{% static "css/cover.css" %}?version=1" rel="stylesheet">
+        
+         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="{% static "js/bootstrap.min.js" %}"></script>
+
+        <!-- Google Analytics -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-61109644-1', 'auto');
+          ga('send', 'pageview');
+        </script>
+        
+    </head>
+    
+    <body>
+        
+        <div class="site-wrapper">
+            <div class="site-wrapper-inner">
+                <div class="cover-container">
+                    
+                    <div class="masthead clearfix">
+                        <div class="inner">
+                            <h1 class="masthead-brand" style="letter-spacing: -2px"><b><a href="/" style="color: #fff">uva schedule | me</a></b></h1>
+                            <nav>
+                                <ul class="nav masthead-nav"; style="text-shadow: 0 1px 3px rgba(0,0,0,.2)">
+                                    <li><a href="/">home</a></li>
+                                    <li class="active"><a href="#">about</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <div class="inner-cover" style="width: 80%;">
+                        <br>
+                        <h5 class="description-text" style="margin: 15px; line-height: 140%; width: 76%; margin-left: 12%">The purpose of this website is to make course scheduling more intuitive at the <a href="http://www.virginia.edu/" target="_blank"><em>University of Virginia</em></a>.</h5>
+                        <h5 class="description-text" style="margin: 15px; line-height: 140%; width: 76%; margin-left: 12%">Tell us what courses you plan on taking, and we'll provide you with a fast, straightforward interface to build your schedule.</h5>
+                        <br>
+                        <h5 class="description-text" style="margin: 15px; line-height: 140%; width: 76%; margin-left: 12%">The data is collected from <a href="http://rabi.phys.virginia.edu/mySIS/CS2/" target="_blank"><em>Lou's List</em></a> on each request, so all information will be accurate to that site (Lou's List mines every hour).</h5>
+                        <h5 class="description-text" style="margin: 15px; line-height: 140%; width: 76%; margin-left: 12%">This site was developed and launched in February 2015; it is currently being maintained.</h5>
+                        <br>
+                        <h5 class="description-text" style="margin: 15px; line-height: 140%; width: 76%; margin-left: 12%"><b><a href="/">Happy scheduling</a>.</b></h5>
+                        
+                        <hr width=40%>
+                        
+                        <h5 class="description-text" style="margin: 15px; line-height: 160%; width: 76%; margin-left: 12%"><em><a href="mailto:srikanth@virginia.edu" style="color: #24437C">Srikanth Chelluri</a> and <a href="mailto:ng3br@virginia.edu" style="color: #24437C">Nikhil Gupta</a> are both second-year students at the University of Virginia, School of Engineering and Applied Science. Srikanth is obtaining a B.S. in Computer Engineering and minoring in engineering business; Nikhil is obtaining a B.S. in Computer Science.</em></h5>
+                        <!-- <h5 class="description-text" style="margin: 15px; line-height: 160%; text-align: right; padding-right: 5%"><b><a href="/">Happy scheduling</a>,</b><br>Srikanth Chelluri<br><em>University of Virginia, Class of 2018</em><br><em>B.S. Computer Engineering, Engineering Business Minor</em><br>Nikhil Gupta<br><em>University of Virginia, Class of 2018</em><br><em>B.S. Computer Science</em></h5> -->
+                    </div>
+                    
+                    <script>
+                        (function() {
+                                var headings = $(".cover-heading");
+                                var forms = $(".description-text");
+                                                                
+                                function showHeading() {
+                                    headings.eq(0).fadeIn(300);
+                                }                            
+                                function showDescription() {
+                                    forms.eq(0).fadeIn(500);
+                                    forms.eq(1).fadeIn(575);
+                                    forms.eq(2).fadeIn(650);
+                                    forms.eq(3).fadeIn(725);
+                                    forms.eq(4).fadeIn(800);
+                                    forms.eq(5).fadeIn(875);
+                                }
+                                
+                                showHeading();
+                                showDescription();
+                            })();
+                    </script>
+                    
+                    <div class="mastfoot">
+                        <div class="inner">
+                            <br>
+                            Site created and maintained by <a href="mailto:ng3br@virginia.edu" style="color: #fff">Nikhil</a> and <a href="mailto:srikanth@virginia.edu" style="color: #fff">Srikanth</a>.
+                            <br>
+                            </b><em>Copyright &copy; 2015 &middot; All rights reserved.</em>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </body>
+
+</html>

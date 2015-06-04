@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- SRIKANTH CHELLURI, NIKHIL GUPTA -->
+    
+    {% load staticfiles %}
+    {% load schedule_extras %}
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="An intuitive way to schedule.">
+        <meta name="author" content="Srikanth Chelluri, Nikhil Gupta">
+        <link rel="icon" href="{% static "favicon/favicon.ico" %}">
+        
+        <title>uva schedule | build</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="{% static "css/bootstrap.css" %}" rel="stylesheet">
+        <!-- Bootstrap style CSS -->
+        <link href="{% static "css/cover-schedule.css" %}?version=5" rel="stylesheet">
+        <link href="{% static "css/jquery.qtip.css" %}" rel="stylesheet">
+        
+         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="{% static "js/bootstrap.min.js" %}"></script>
+        
+        <!-- FullCalendar, use JQueryUI for drag/snap/drop implementation (see fullcalendar.io) -->
+        <script src="{% static "lib/moment.min.js" %}"></script>
+        <link href="{% static "fullcalendar/fullcalendar.css" %}" rel="stylesheet">
+        <link href="{% static "fullcalendar/fullcalendar.print.css" %}" rel="stylesheet" media="print">
+        <script src="{% static "fullcalendar/fullcalendar.js" %}"></script>
+        <script src="{% static "js/jquery.qtip.min.js" %}"></script>
+        <script src="{% static "imagesloaded.pkg.min.js" %}"></script>
+        
+        <script>
+        
+            var json_data = JSON.parse('{{ json_data|safe }}'); // Read JSON data from Django
+            var json_lecture_names = JSON.parse('{{ json_lecture_names|safe }}');
+            var remaining_colors = ['#9400D3', '#00CED1','#FFA812', '#8B008B', '#666699', '#BDB76B', '#556B2F', '#8B0000', '#E75480', '#9B870C']
+            var used_colors = []
+            
+            function unique(arr) { // returns a list of unique values
+                var u = {}, a = [];
+                for(var i = 0, l = arr.length; i < l; ++i){
+                    if(!u.hasOwnProperty(arr[i])) {
+                        a.push(arr[i]);
+                        u[arr[i]] = 1;
+                    }
+                }
+                return a;
+            }
+            
+            function calendarSourceFunc(start, end, timezone, callback) {
+                
+                var forms = document.getElementsByTagName("form"); // Get list of all form elements on page
+                console.log(forms);
+                var events = []; // Initialize empty array of events that we will push to the calendar
+                var ids = [];
+                var total_credits = 0.0;
+                
+                
+                for(var i = 0; i < forms.length; i++) {
+                    var checkBoxes = forms[i].getElementsByTagName("input"); // Get all inputs for a specific form
+                    for(var j = 0; j < checkBoxes.length; j++) {
+                        if(checkBoxes[j].type == "checkbox" && checkBoxes[j].checked == true) { // If the input is a radio button and it's checked off
+                            var name = checkBoxes[j].name; // Get the name (ex. CS2110-lecture)
+                            var split = name.split('-'); 
+                            var courseName = split[0]; // Get first half (ex. CS2110)
+                            var courseType = split[1]; // Get type (lab or lecture)
+                            var sectionId = parseInt(checkBoxes[j].value); // Section ID = 5 digit number
+                            var sections = json_data[courseName]; // get list of sections for this specific course name
+                            ids[ids.length] = sectionId;
+                            
+                            console.log(name);
+                            console.log(courseName);
+                            
+                            for(var k = 0; k < sections.length; k++) {
+                                if(parseInt(sections[k]["id"]) == parseInt(sectionId)) { // Found the right section to display
+                                    if(json_lecture_names[courseName] == sections[k]['type'] || !(courseName in json_lecture_names)) {
+                                        total_credits += parseFloat(sections[k]['credits']);
+                                    }
+                                     
+                                    var setTimes = unique(sections[k]['times'])
+                                    for(var l = 0; l < setTimes.length; l++) { // Loop through all of the times that this section meets (usually just one)
+                                        var times = setTimes[l];//String(sections[k]['times'][l]); // Get one of the times from the list of times (ex. MoWeFri 10:30AM - 11:45AM)
+                                        if(times == 'TBA') {
+                                            break;
+                                        }
+                                        
+                                        var loc = times.indexOf(' '); // Find the first occurence of space
+                                        var timeSplit = [times.substring(0, loc), times.substring(loc + 1)]; // Split it into two elements. 'MoWeFr' and '10:30AM - 11:45AM'
+                                        var days = timeSplit[0]; // ex. MoWeFr
+                                        var timing = timeSplit[1]; // ex. '10:30AM - 11:45AM'
+                                        var startAndEndTime = timing.split(' - '); // ex. [10:30AM, 11:45AM] = Array with first element as start, second element as end
+                                        var startTime = startAndEndTime[0].split(":"); // gets the start time string and splits into hours and minutes [10, 30AM]
+                                        var endTime = startAndEndTime[1].split(":"); // end time split up into hours and minutes [11, 45AM]
+                                        
+                                       
+                                        
+                                        var startHour = parseInt(startTime[0]); // Gets the hour as the first element
+                                        var startMin = parseInt(startTime[1].substring(0, 2)); // Gets the minutes without the AM/PM
+                                        if(startTime[1].substring(2) == "PM" && startHour < 12) { // Add 12 hours to convert to military time if PM
+                                            startHour += 12;
+                                        }
+                                        
+                                        var endHour = parseInt(endTime[0]);
+                                        var endMin = parseInt(endTime[1].substring(0, 2));
+                                        if(endTime[1].substring(2) == "PM" && endHour < 12) { // Same thing for the end time
+                                            endHour += 12;
+                                        }
+                                        
+                                        // Returns an array of individual day abbreviations
+                                        // MoWeFr becomes [Mo, We, Fri]
+                                        // Changing the {1,2} to {1, n} takes the substring
+                                        // at every 'n' characters.
+                                        var individualDays = days.match(/.{1,2}/g); 
+
+                                        // Loop through these days to add them to the calendar.
+                                        for(var m = 0; m < individualDays.length; m++) {
+                                            var day = individualDays[m]; // Get a single element from the individualDays array
+                                            var momentStart = moment().startOf('week'); // Start at the sunday of this week
+                                            var momentEnd = moment().startOf('week'); // Start at the sunday of this week
+                                            
+                                            // Depending on the day, shift the start/end a certain number of days
+                                            // ex. Monday is 1 day away from the Sunday at which the moment was
+                                            // initialized, so we shift 1 day over.
+                                            // We do this for all of the days, but if it's Sunday then we don't need to
+                                            // shift because we're already there.
+                                            // If the day is not any of these, it's an invalid day and we leave this iteration.
+                                            if(day == "Mo") {
+                                                momentStart = momentStart.add(1, 'days');
+                                                momentEnd = momentEnd.add(1, 'days');
+                                            } else if(day == "Tu") {
+                                                momentStart = momentStart.add(2, 'days');
+                                                momentEnd = momentEnd.add(2, 'days');
+                                            } else if(day == "We") {
+                                                momentStart = momentStart.add(3, 'days');
+                                                momentEnd = momentEnd.add(3, 'days');
+                                            } else if(day == "Th") {
+                                                momentStart = momentStart.add(4, 'days');
+                                                momentEnd = momentEnd.add(4, 'days');
+                                            } else if(day == "Fr") {
+                                                momentStart = momentStart.add(5, 'days');
+                                                momentEnd = momentEnd.add(5, 'days');
+                                            } else if(day == "Sa") {
+                                                momentStart = momentStart.add(6, 'days');
+                                                momentEnd = momentEnd.add(6, 'days');
+                                            } else if(day != "Su") {
+                                                continue;
+                                            }
+                                            
+                                            // Since adding these days still leaves it at 00:00:00 on a specific day (midnight),
+                                            // we need to add the hours and minutes to get to the correct times.
+                                            momentStart = momentStart.add(startHour, 'hours').add(startMin, 'minutes'); // 
+                                            momentEnd = momentEnd.add(endHour, 'hours').add(endMin, 'minutes');
+                                            
+                                            // Initialize associative array for a specfiic event
+                                            var event = {};
+                                            
+                                            // Set attributes based on the variables calculated earlier.
+                                            event['title'] = courseName;
+                                            event['type'] = courseType.charAt(0).toUpperCase() + courseType.substring(1);
+                                            event['start'] = momentStart.format();
+                                            event['end'] = momentEnd.format();
+                                            event['allDay'] = false;
+                                            event['backgroundColor'] = sections[k]['color'];
+                                            event['borderColor'] = sections[k]['color'];
+                                            event['info'] = sections[k];
+                                            
+                                            // Push this event to the Array of all events.
+                                            events.push(event);
+                                        }
+                                    }
+                                }
+                            }   
+                            
+                        }
+                    }
+                    
+                }
+                
+                if(ids.length == 0) {
+                    $('#id-list').html("<h5> <br> </h5>");
+                } else {
+                    var ids_listLabel = "Course ID(s)";
+                    var ids_list = " ";
+                    for(var i = 0; i < ids.length; i++) {
+                        ids_list += ids[i];
+                        if(i != ids.length - 1) {
+                            ids_list += ", ";
+                        }
+                    }
+                    //<a href="https://sisuva.admin.virginia.edu/epprd/signon.html" target= "_blank"></a>
+                    $('#id-list').html('<em>' + ids_listLabel + '</em>' + ':' + ids_list + '');
+                    $('#id-list-print').html('<em>' + ids_listLabel + '</em>' + ':' + ids_list + '');
+                }
+                
+                if(total_credits == 0) {
+                    $('#total-credits').html('<h5>You don\'t have any credits selected.</h5>');
+                } else if(total_credits == 1) {
+                    $('#total-credits').html('<h5>You have <u>' + total_credits + ' credit</u> selected.</h5>');
+                } else {
+                    $('#total-credits').html('<h5>You have <u>' + total_credits + ' credits</u> selected.</h5>');
+                }
+                $('#total-credits-print').html("hi");
+                
+                // Return the Array of events to the calendar for display.
+                callback(events);
+            }
+                
+            function rgb2hex(rgb) {
+                if (/^#[0-9A-F]{6}$/i.test(rgb)) return rgb;
+            
+                rgb = rgb.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+                function hex(x) {
+                    return ("0" + parseInt(x).toString(16)).slice(-2);
+                }
+                return "#" + hex(rgb[1]) + hex(rgb[2]) + hex(rgb[3]);
+            }
+            
+            function getRandColor(){
+                var brightness = 3;
+                //6 levels of brightness from 0 to 5, 0 being the darkest
+                var rgb = [Math.random() * 256, Math.random() * 256, Math.random() * 256];
+                var mix = [brightness*51, brightness*51, brightness*51]; //51 => 255/5
+                var mixedrgb = [rgb[0] + mix[0], rgb[1] + mix[1], rgb[2] + mix[2]].map(function(x){ return Math.round(x/2.0)})
+                return "rgb(" + mixedrgb.join(",") + ")";
+            }
+              
+            $(document).ready(function() {
+                $('.specific-course').each(function() {
+                    var id = $(this).attr('id').split('-');
+                    var course = id[1];
+                    var type = id[2];
+                    
+                    console.log(course);
+                    
+                    $(this).hover(function() {
+                        // Mouse In
+                        console.log('Hovered in');
+                        $('#button-remove-' + course + '-' + type).show();
+                    }, function() {
+                        console.log('Hovered out');
+                        $('#button-remove-' + course + '-' + type).hide();
+                    });
+                    
+                    var cur_color = rgb2hex($(this).css('backgroundColor')).toUpperCase();
+                    
+                    console.log(cur_color);
+                    
+                    var index = remaining_colors.indexOf(cur_color);
+                    console.log(index);
+                    
+                    if(index > -1)
+                        remaining_colors.splice(cur_color, 1);
+                    used_colors.push(cur_color);
+                });
+                
+                $("#calendar").fullCalendar({
+                    header: false,
+                    defaultView: 'agendaWeek',
+                    weekends: true,
+                    allDaySlot: false,
+                    minTime: "07:30:00",
+                    maxTime: "23:00:00",
+                    slotDuration: "00:30:00",
+                    aspectRatio: 1.0,
+                    axisFormat: "hA", /* DEFAULT: h(:mm)a */
+                    editable: false, /* testing */
+                    columnFormat: "dddd", /* DEFAULT: ddd M/D */
+
+                    events:calendarSourceFunc,
+                    eventRender: function(event,element) {
+                        var courseName = event.title;
+                        var courseType = event.type;
+                        
+                        var content = "";
+
+                        console.log(event.info.instructors);
+                        
+                        for(var i = 0; i < event.info.instructors.length; i++) {
+                            content += event.info.instructors[i] + " (" + event.info.times[i] + ") - " + event.info.locations[i] + "<br>";
+                        }
+                        content += "Enrollment: " + event.info.current_enrollment + "/" + event.info.max_enrollment + "<br>";
+                        content += "Credit(s): " + event.info.credits + "<br>"
+                        content += "ID: " + event.info.id + "<br>";
+                        if(event.info.courseforum != '') {
+                            content += '<a style="color:#000;" href="#" onclick="openRatings(\'http://www.thecourseforum.com/courses/' + event.info.courseforum + '\')"><em>Ratings (theCourseForum)</en></a>';
+                        }
+                        
+                        console.log("CourseForum: " + event.info.courseforum);
+                        
+                        //content += "<br />" + event.info.locations;
+                        
+                        element.qtip({ 
+                            content: {
+                                title: '<b>' + courseName + ' | ' + event.info.course_title + ' - ' + courseType + '</b>',
+                                text: content
+                            },
+                            show: {
+                                delay:200,
+                                solo: true
+                            },
+                            hide: {
+                                when: {event:'mouseout'}, fixed: true, delay: 200
+                            },
+                            style:{
+                                classes:'qtip-bootstrap'
+                            },
+                            position:{
+                                my: 'bottom left',
+                                at: 'top right',
+                                viewport:$(window)
+                            }
+                        });
+                    },
+                });
+                
+                buttonChanged();
+                
+                var frm = $('#update-form')
+                frm.submit(function() {
+                    $.ajax({
+                        type: frm.attr('method'),
+                        url: frm.attr('action'),
+                        data: frm.serialize(),
+                        success: function (data) {
+                            var json = JSON.parse(data);
+                            var courses = Object.keys(json['courses']);
+                            
+                            var originalLength = Object.keys(json_data).length;
+                            
+                            
+                            for(var i = 0; i < courses.length; i++) {
+                                    
+                                var courseName = courses[i];
+                                
+                                if(courseName in json_data)
+                                    continue;
+                                    
+                                if(courseName in json['lecture_names'])
+                                    json_lecture_names[courseName] = json['lecture_names'][courseName];
+                                    
+                                json_data[courseName] = json['courses'][courseName];
+                                
+                                
+                                console.log(json_data);
+                                
+                                var color;
+                                if(remaining_colors.length == 0) {
+                                    color = getRandColor();
+                                } else {
+                                    color = remaining_colors[0];
+                                    var index = remaining_colors.indexOf(color);
+                                    if(index > -1)
+                                        remaining_colors.splice(index, 1);
+                                    used_colors.push(color);
+                                }
+                                
+                                
+                                if(json['has_lecture'][courseName] == true) {
+                                    var html = '<div class="specific-course" id="course-' + courseName + '-lecture" style="background-color:' + color + '; overflow-y: auto; max-height: 500px">';
+                                    html += '<form action="" style="line-height: 1">';
+                                    html += '<button class="btn btn-default btn-xs" id="button-remove-' + courseName + '-lecture" type="button" name=' + courseName + ' onclick="removeCourse(this)" style="display:none; background: none; border: none; position:absolute; right:10px; top:10px;">'
+                                    html += '<span class="glyphicon glyphicon-remove" style="color: #fff"></span></button>'
+                                    html += '<div style="font-size: 15px"><strong>' + courseName + '</strong> | <strong>' + json['course_titles'][courseName] + '<br><br>'
+                                    html += 'Choose a';
+                                    if(json['lecture_vowel'][courseName] == true)
+                                        html += 'n';
+                                    html += ' ' + json['lecture_names'][courseName] + ':' + '</strong></div><br><br>'
+                                    
+                                    for(var j = 0; j < json['courses'][courseName].length; j++) {
+                                        var section = json['courses'][courseName][j];
+                                        json['courses'][courseName][j]['color'] = color;
+                                        
+                                        if(json['lecture_names'][courseName] == section['type']) {
+                                            html += '<label style="display:inline;"> <input class="section-checkbox" id="' + courseName + '-lecture-' + j + '" type="checkbox"'
+                                            html += 'name="' + courseName + '-lecture" value="' + section['id'] + '" onClick="buttonChanged()" style="position:relative; float:left; left:5%; bottom: 3px;"/>'
+                                            for(var k = 0; k < section['instructors'].length; k++) {
+                                                var instructor = section['instructors'][k];
+                                                var times = section['times'][k];
+                                                html += '<div style="font-weight:normal; text-align:left; padding-left: 1.5cm">' + instructor + ' (' + times + ')</div>'
+                                                if(k + 1 < section['instructors'].length) {
+                                                    html += '<br>'
+                                                }
+                                            }
+                                            html += '</label><br><br>'
+                                        }
+                                    }
+                                    
+                                    html += '</form></div>'
+                                    
+                                    $('.section-selector').append(html);
+                                     $('#course-' + courseName + '-lecture').hover(function() {
+                                        // Mouse In
+                                        console.log('Hovered in');
+                                        $('#button-remove-' + courseName + '-lecture').show();
+                                    }, function() {
+                                        console.log('Hovered out');
+                                        $('#button-remove-' + courseName + '-lecture').hide();
+                                    });
+                                }
+                                
+                                if(json['has_lab'][courseName] == true) {
+                                    var html = '<div class="specific-course" id="course-' + courseName + '-lab" style="background-color:' + color + '; overflow-y: auto; max-height: 500px">';
+                                    html += '<form action="" style="line-height: 1">';
+                                    html += '<button class="btn btn-default btn-xs" id="button-remove-' + courseName + '-lab" type="button" name=' + courseName + ' onclick="removeCourse(this)" style="display:none; background: none; border: none; position:absolute; right:10px; top:10px;">'
+                                    html += '<span class="glyphicon glyphicon-remove" style="color: #fff"></span></button>'
+                                    html += '<div style="font-size: 15px"><strong>' + courseName + '</strong> | <strong>' + json['course_titles'][courseName] + '<br><br>'
+                                    html += 'Choose a Lab/Discussion:</strong></div><br><br>'
+                
+                                    
+                                    for(var j = 0; j < json['courses'][courseName].length; j++) {
+                                        var section = json['courses'][courseName][j];
+                                        json['courses'][courseName][j]['color'] = color;
+                                        
+                                        if(json['lecture_names'][courseName] != section['type']) {
+                                            html += '<label style="display:inline;"> <input class="section-checkbox" id="' + courseName + '-lab-' + j + '" type="checkbox"'
+                                            html += 'name="' + courseName + '-lab" value="' + section['id'] + '" onClick="buttonChanged()" style="position:relative; float:left; left:5%; bottom: 3px;"/>'
+                                            for(var k = 0; k < section['instructors'].length; k++) {
+                                                var instructor = section['instructors'][k];
+                                                var times = section['times'][k];
+                                                html += '<div style="font-weight:normal; text-align:left; padding-left: 1.5cm">' + instructor + ' (' + times + ')</div>'
+                                                if(k + 1 < section['instructors'].length) {
+                                                    html += '<br>'
+                                                }
+                                            }
+                                            html += '</label><br><br>'
+                                        }
+                                    }
+                                    
+                                    html += '</form></div>'
+                                    
+                                    $('.section-selector').append(html);
+                                    $('#course-' + courseName + '-lab').hover(function() {
+                                        // Mouse In
+                                        console.log('Hovered in');
+                                        $('#button-remove-' + courseName + '-lab').show();
+                                    }, function() {
+                                        console.log('Hovered out');
+                                        $('#button-remove-' + courseName + '-lab').hide();
+                                    });
+                                }
+                            }
+
+                            $('#id_courses').val('');
+                                                        
+                        },
+                        error: function(data) {
+                            frm.html("Something went wrong.");
+                        }
+                    });
+                    
+                    return false;
+                });
+                
+                $('#id_courses').focus(function(){
+                    $(this).data('placeholder', $(this).attr('placeholder'))
+                    $(this).attr('placeholder', '');
+                });
+                
+                $('#id_courses').blur(function(){
+                    $(this).attr('placeholder', $(this).data('placeholder'));
+                    
+                });
+                
+                $('#calendar').fullCalendar('option', 'height', 685);
+
+                // Called whenever one of the radiobuttons is clicked on any one of the forms.
+            });
+            
+            function buttonChanged() {
+                // Update events using the calendarEventFunc created above.
+                $('#calendar').fullCalendar('refetchEvents'); // Reload Events
+            }
+            
+            function openRatings(link) {
+                window.open(link, 'TheCourseForum Ratings', 'height=500, width=600');
+            }
+            
+            function removeCourse(element) {
+                var courseName = element.name;
+                
+                var lecture = $('#course-' + courseName + '-lecture');
+                var lab = $('#course-' + courseName + '-lab');
+                
+                var color;
+                
+                if(lecture.length > 0)
+                    color = rgb2hex(lecture.css('background-color')).toUpperCase();
+                    console.log(lecture);
+                    lecture.fadeOut(250, function() {
+                        $(this).remove(); // Fade out and then remove
+                    });
+                    //lecture.remove();
+                if(lab.length > 0)
+                    color = rgb2hex(lab.css('background-color')).toUpperCase(); // Make sure hex code is upper case 
+                    console.log(lab);
+                    lab.fadeOut(250, function() {
+                        $(this).remove(); // Fade out and then remove
+                    });
+                    //lab.remove();
+                
+            
+                console.log(color);
+                
+                remaining_colors.push(color);
+                var index = used_colors.indexOf(color);
+                if(index > -1)
+                    used_colors.splice(index, 1);
+                
+                delete json_data[courseName];
+                delete json_lecture_names[courseName];
+
+                // Color gets repeated
+                buttonChanged();
+            }
+        </script>
+
+        <!-- Google Analytics -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+        
+          ga('create', 'UA-61109644-1', 'auto');
+          ga('send', 'pageview');
+        
+        </script>
+        
+        <script>
+            window.onbeforeunload = leavingWarning;
+            function leavingWarning() {
+                return("You will lose any schedule you built here since we don't save any of your data.")
+            }
+        </script>
+        
+    </head>
+    
+    <body>
+        
+        <div class="site-wrapper">
+            <div class="site-wrapper-inner">
+                <div class="cover-container">
+                    
+                    <div class="masthead clearfix">
+                        <div class="inner">
+                            <h1 class="masthead-brand" style="letter-spacing: -2px; text-shadow: 0 1px 3px rgba(0,0,0,.5);"><b><a href="/" style="color: #fff">uva schedule | me</a></b></h1>
+                            <nav>
+                                <ul class="nav masthead-nav"; style="text-shadow: 0 1px 3px rgba(0,0,0,.2)">
+                                    <li><a href="/">home</a></li>
+                                    <li><a href="/about">about</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <div class="inner cover">
+                        <h3 class="cover-heading" style="text-shadow: 0 1px 3px rgba(0,0,0,.2);"><b>Here's your schedule sandbox.</b></h3>
+                        <h5>
+                            <br><div id="total-credits">You don't have any credits selected.<div>
+                        </h5>
+                        <h5><div id="id-list"></div></h5>
+                        <h5><div id="print-link" style="cursor: pointer; display: inline-block" title="Not working? Try adjusting your page zoom on this page."><b>Print your schedule (beta).</b></div></h5>
+                        <!-- <h5 class="instruction" style="margin: 5px; line-height: 140%;">Select different timings and hover over calendar events for more info - the schedule will update dynamically.</h5>
+                        <h5 class="instruction" style="margin: 5px; line-height: 140%;">Done? The course IDs (5-digit identifiers) are at the bottom. Enter those into the <a href="https://sisuva.admin.virginia.edu/psp/epprd/EMPLOYEE/EMPL/h/?tab=PAPP_GUEST" target="_blank"><em>Student Information System (SIS)</em></a>.</h5>
+                        <h5 class="instruction" style="margin: 10px; line-height: 140%;"><a href="/"><b>Want to see different courses? Go back</a>.</b></h5> -->
+                        <br>
+                        <br>
+
+                        <div class="schedule-selector">
+                            <!-- <input type="button" onclick="printDiv()" value="Print printDiv" /> -->
+                            <script>
+                                var element = document.getElementById('print-link');
+                                element.onclick = printDiv;
+                                function printDiv() {
+                                    var printContents = document.getElementById('calendar').innerHTML;
+                                    var printWindow = window.open('', 'Print Schedule', 'height=800, width=800');
+                                    
+                                    console.log(printContents);
+                                    printWindow.document.write('<html><head>');
+                                    printWindow.document.write('<link rel="stylesheet" type="text/css" href="/static/css/bootstrap.css" />');
+                                    printWindow.document.write('<link rel="stylesheet" type="text/css" href="/static/fullcalendar/fullcalendar-print.css" />');
+                                    printWindow.document.write('</head><h2><b style="display: inherit; text-align: center; line-height: 1">uva schedule | me</b></h2><br><h5 style="display: inherit; text-align: center; line-height: 1.2; margin-top: -10px"><b>Printing is a still beta feature.</b><br>Developed at <em>uvaschedule.me</em>.</h5><br><body>');
+                                    printWindow.document.write('<div id="calendar" class="fc fc-ltr fc-unthemed">')
+                                    printWindow.document.write(printContents);
+                                    printWindow.document.write('</div>')
+                                    printWindow.document.write('</body><h6 style="display: inherit; text-align: center">Site created and maintained by Nikhil and Srikanth.<br><em>Copyright &copy; 2015 &middot; All rights reserved.</em></h6></html>');
+                                    
+                                    setTimeout(printSched, 200);
+                                    function printSched() {
+                                        printWindow.print();
+                                    }
+                                }
+                            </script>
+
+                            <!-- CALENDAR MARKUP STARTS HERE -->
+                            <div id="calendar"></div>
+                            <!-- CALENDAR MARKUP ENDS HERE -->
+                            
+                            <div class="section-selector" id="section-selector" style="text-shadow: 0 1px 3px rgba(0,0,0,.25); line-height: 1; padding-bottom: 50px; overflow-y: scroll">
+                                <div id="update-form-container">
+                                    <form id="update-form" action="../update/" method="POST" autocomplete="off" style="border: solid; border-width: 1px; padding: 20px; padding-bottom: 25px; margin-left: 6%; margin-right: 4.5%; background-color: #284A8A; border: none; box-shadow: 0 0 30px rgba(0, 0, 0, 0.3)">
+                                        <p style="font-weight: bold; font-size: 16px">Add more courses:</p>
+                                        {% csrf_token %}
+                                        {{ update_form }}
+                                        <input type="submit" value="Add Course" style="display:none; color: #1C1C1C; font-weight: 600; text-align: center; padding: 2px">
+                                    </form>
+                                </div>
+                                {% for course, sections in courses.items %}
+                                    {% if has_lecture|keyvalue:course == True %}
+                                        <div class="specific-course" id="course-{{course}}-lecture" style="background-color:{{ sections.0.color }}; overflow-y: auto; max-height:500px">
+                                            <form action="" style="line-height: 1">
+                                                <button class="btn btn-default btn-xs" id="button-remove-{{course}}-lecture" type="button" name={{course}} onclick="removeCourse(this)" style="display:none; background: none; border: none; position:absolute; right:10px; top:10px;">
+                                                    <span class="glyphicon glyphicon-remove" style="color: #fff"></span>
+                                                </button>
+                                                
+                                                <div style="font-size: 15px"><strong>{{ course }} | {{ course_titles|keyvalue:course }}</strong>
+                                                <br>
+                                                <br><strong>Choose a{% if lecture_vowel|keyvalue:course %}n{%endif%} {{ lecture_names|keyvalue:course }}:</strong></div>
+                                                <br>
+                                                <br>
+                                                {% for section in sections %}
+                                                    {% if lecture_names|keyvalue:course == section.type %}
+                                                        <label style="display:inline;">
+                                                            <input class="section-checkbox" id="{{ course }}-lecture-{{ forloop.counter0 }}" type="checkbox" name="{{ course }}-lecture" value="{{ section.id }}" onclick="buttonChanged()" style="position:relative; float:left; left:5%; bottom: 3px;"/>
+                                                            {% for instructor, time in section.instructortimes %}
+                                                                <div style="font-weight:normal; text-align:left; padding-left: 1.5cm">{{ instructor }} ({{ time }})</div>
+                                                                {% if not forloop.last %}
+                                                                    <br />
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </label>
+                                                        <br><br>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </form>
+                                        </div>
+                                    {% endif %}
+                                    
+                                    
+                                    {% if has_lab|keyvalue:course == True %}
+                                        <div class="specific-course" id="course-{{course}}-lab" style="background-color:{{ sections.0.color }}; overflow-y: auto; max-height:500px">
+                                            <form action="" style="line-height: 1">
+                                                <button class="btn btn-default btn-xs" id="button-remove-{{course}}-lab" type="button" name={{course}} onclick="removeCourse(this)" style="display:none; background: none; border: none; position:absolute; right:10px; top:10px;">
+                                                    <span class="glyphicon glyphicon-remove" style="color: #fff"></span>
+                                                </button>
+                                                
+                                                <div style="font-size: 15px"><strong>{{ course }} | {{ course_titles|keyvalue:course }}</strong>
+                                                <br> 
+                                                <br><strong>Choose a Lab/Discussion:</strong></div>
+                                                <br>
+                                                <br>
+                                                {% for section in sections %}
+                                                    {% if lecture_names|keyvalue:course != section.type %}
+                                                        <label style="display:inline;">
+                                                            <input class="section-checkbox" id="{{ course }}-lab-{{ forloop.counter0 }}" type="checkbox" name="{{ course }}-lab" value="{{ section.id }}" onclick="buttonChanged()" style="position:relative; float:left; left:5%; bottom: 3px" />
+                                                            {% for instructor, time in section.instructortimes %}
+                                                                <div style="font-weight:normal; text-align:left; padding-left: 1.5cm">{{ instructor }} ({{ time }})</div>
+                                                                {% if not forloop.last %}
+                                                                    <br />
+                                                                {% endif %}
+                                                            {% endfor %}
+                                                        </label>
+                                                        <br><br>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </form>
+                                        </div>
+                                    {% endif %}
+    
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <script>
+                            (function() {
+                                var headings = $(".cover-heading");
+                                var instructions = $(".instruction");
+                                var calendars = $(".calendar");
+                                
+                                function showHeading() {
+                                    headings.eq(0).fadeIn(500);
+                                }
+                                function showInstruction() {
+                                    instructions.eq(0).fadeIn(800);
+                                    instructions.eq(1).fadeIn(875);
+                                    instructions.eq(2).fadeIn(950);
+                                }
+                                function showCalendar() {
+                                    calendars.eq(0).fadeIn(800);
+                                }
+                                
+                                showHeading();
+                                showInstruction();
+                                showCalendar();
+                            })();
+                        </script>
+                        <br>
+                        <br>
+                    </div>
+                    
+                    <div class="mastfoot">
+                        <div class="inner">
+                            <br>
+                            Site created and maintained by <a href="mailto:ng3br@virginia.edu" style="color: #fff">Nikhil</a> and <a href="mailto:srikanth@virginia.edu" style="color: #fff">Srikanth</a>.
+                            <br>
+                            </b><em>Copyright &copy; 2015 &middot; All rights reserved.</em>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </body>
+
+</html>

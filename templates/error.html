@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- SRIKANTH CHELLURI, NIKHIL GUPTA -->
+
+    {% load staticfiles %}
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="[ADD HERE]">
+        <meta name="author" content="[ADD HERE]">
+        <link rel="icon" href="{% static "favicon/favicon.ico" %}">
+        
+        <title>uva schedule | error</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="{% static "css/bootstrap.css" %}" rel="stylesheet">
+        <!-- Bootstrap style CSS -->
+        <link href="{% static "css/cover.css" %}" rel="stylesheet">
+        
+         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="{% static "js/bootstrap.min.js" %}"></script>
+
+        <!-- Google Analytics -->
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-61109644-1', 'auto');
+  ga('send', 'pageview');
+
+</script>
+    </head>
+    
+    <body>
+        <div class="site-wrapper">
+            <div class="site-wrapper-inner">
+                <div class="cover-container">
+                    
+                    <div class="masthead clearfix">
+                        <div class="inner">
+                            <h1 class="masthead-brand" style="letter-spacing: -2px"><b><a href="/">uva schedule | me</a></b></h1>
+                            <nav>
+                                <ul class="nav masthead-nav"; style="text-shadow: 0 1px 3px rgba(0,0,0,.2)">
+                                    <li><a href="/" style="color: #fff">home</a></li>
+                                    <li><a href="/about">about</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <div class="inner cover">
+                        <h3 class="cover-heading"><b>Something's not right.</b></h3>
+                        {% if error %}
+                            <h3 class="cover-heading"><b>{{ error }}</b></h3>
+                        {% endif %}
+                        <h5 class="description-text" style="margin: 15px; line-height: 140%;">We are currently down right now but working on getting back up as soon as possible.</h5>
+                        <h5 class="description-text" style-"margin: 15px; line-height: 140%;">If you feel like you need to let us know about something, though, you can contact us via email by clicking on either name at the bottom of the page.</h5>
+                        <h4 class="description-text" style="margin: 15px; line-height: 140%;"><b><a href="/">Maybe it was a small slip-up. You can try again</a>.</b></h4>
+                    </div>
+                    
+                    <script>
+                        (function() {
+                                var headings = $(".cover-heading");
+                                var forms = $(".description-text");
+                                                                
+                                function showHeading() {
+                                    headings.eq(0).fadeIn(500);
+                                }                            
+                                function showDescription() {
+                                    forms.eq(0).fadeIn(800);
+                                    forms.eq(1).fadeIn(875);
+                                    forms.eq(2).fadeIn(950);
+                                    forms.eq(3).fadeIn(1025);
+                                    forms.eq(4).fadeIn(1100);
+                                    forms.eq(5).fadeIn(1175);
+                                    forms.eq(6).fadeIn(1250);
+                                }
+                                
+                                showHeading();
+                                showDescription();
+                            })();
+                    </script>
+                    
+                    <div class="mastfoot">
+                        <div class="inner">
+                            <br>
+                            Site created and maintained by <a href="mailto:ng3br@virginia.edu" style="color: #fff">Nikhil</a> and <a href="mailto:srikanth@virginia.edu" style="color: #fff">Srikanth</a>.
+                            <br>
+                            </b><em>Copyright &copy; 2015 &middot; All rights reserved.</em>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </body>
+
+</html>

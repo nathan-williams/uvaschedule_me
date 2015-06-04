@@ -1,0 +1,31 @@
+BUG REPORT FORM
+PLAIN LIST OF COURSE DETAILS, PRINT SCHEDULE
+HOVER BOX LOUS' LIST DESCRIPTION - add course description, course forum link
+LINK CLASS/LAB TITLES TO COURSEFORUM
+CHANGE FEEDBACKBUG BUTTON
+ADSENSE
+TOAST NOTIFYING OF A NONEXISTING CLASS
+ANIMATIONS
+ALPHABETICAL SORTING
+
+(KEEP UPDATING FRAMEWORKS)
+
+BUGS
+    right click hover box to copy not working
+
+
+To do after going live.
+    Favicon.
+    Google Analytics.
+    Clean up code.
+    
+Later.
+    AdSense?
+
+New Features.
+    Way to change which semester courses are parsed from.
+    Links to a specific course's information/textbooks.
+    Direct integration with TheCourseForum.
+    Access to UVA course evaluations.
+    Select and sign up for courses directly on the site.
+    Ability to add/remove courses while in sandbox

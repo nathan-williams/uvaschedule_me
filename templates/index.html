@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+    <!-- SRIKANTH CHELLURI, NIKHIL GUPTA -->
+   
+    {% load staticfiles %}
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="An intuitive way to schedule.">
+        <meta name="author" content="Srikanth Chelluri, Nikhil Gupta">
+        <link rel="icon" href="{% static "favicon/favicon.ico" %}">
+        
+        <title>uva schedule | me</title>
+
+        <!-- Bootstrap core CSS -->
+        <link href="{% static "css/bootstrap.css" %}" rel="stylesheet">
+        <!-- Bootstrap style CSS -->
+        <link href="{% static "css/cover.css" %}?version=2" rel="stylesheet">
+        
+         <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+        <!-- Include all compiled plugins (below), or include individual files as needed -->
+        <script src="{% static "js/bootstrap.min.js" %}"></script>
+
+        <!-- Google Analytics -->
+        <script>
+          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+          })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+          ga('create', 'UA-61109644-1', 'auto');
+          ga('send', 'pageview');
+        </script>
+        
+    </head>
+    
+    <body>
+        
+        <script>
+            $( document ).ready(function() {
+                var mobileBool = false;
+                if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
+                    mobileBool = true;
+                    alert("It looks like you're on a mobile device.\n\nThis site hasn't been optimized to work on a small screen (yet), so proceed with caution. It might get a little messy.");
+                }
+            });
+        </script>
+        
+        <div class="site-wrapper">
+            <div class="site-wrapper-inner">
+                <div class="cover-container">
+                    
+                    <div class="masthead clearfix">
+                        <div class="inner">
+                            <h1 class="masthead-brand" style="letter-spacing: -2px"><b><a href="#" style="color: #fff">uva schedule | me</a></b></h1>
+                            <nav>
+                                <ul class="nav masthead-nav"; style="text-shadow: 0 1px 3px rgba(0,0,0,.2)">
+                                    <li class="active"><a href="#" style="color: #fff">home</a></li>
+                                    <li><a href="/about">about</a></li>
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <div class="inner-cover">
+                        <h3 class="cover-heading" style="line-height: 150%"><b>Which <a href="http://rabi.phys.virginia.edu/mySIS/CS2/" target="_blank">course(s)</a> do you want to take?</b></h3>
+
+                        <h5 class="example"><em>eg. CS 2102, CS 2110, ECE 2330, COMM 2010, ENGR 1559</em></h5>
+                        <h5 class="example"><em>eg. COMM 2010, ECON 2010</em></h5>
+                        <h5 class="example"><em>eg. STS 1500, CHEM 1611, PHYS 1425, PHYS 1429, ENGR 1620, ENGR 1621</em></h5>
+                        <h5 class="example"><em>eg. APMA 3100, CS 2150, CS 2630, ECON 2010, SYS 2057</em></h5>
+                        <h5 class="example"><em>eg. ANTH 1010</em></h5>
+                        <h5 class="example"><em>eg. CHEM 1820, CHEM 1821, ECON 2020, ASTR 1210, RELG 1040</em></h5>
+                        
+
+                        <br>
+                        <form action="/schedule/" method="POST" autocomplete="off">
+                            {% csrf_token %}
+                            {{ form }}
+                            <input type="submit" value="Done" style="display: none; color: #1C1C1C; font-weight: 600; text-align: center; padding: 2px">
+                        </form>
+                        
+                        <br>
+                        
+                        <!-- MEMOS HERE -->
+                        <h5 class="memo-heading" style="line-height: 1"><b>Welcome, class of 2019!</b></h6>
+                        <h5 class="memo-heading" style="line-height: 1"><b>Happy scheduling.</b></h6>
+                        <!-- divider -->
+                        <h5 class="memo-heading" style="line-height: 1"><b>Welcome, class of 2019!</b></h6>
+                        <h5 class="memo-heading" style="line-height: 1"><b>Welcome, class of 2019!</b></h6>
+                        <h5 class="memo-heading" style="line-height: 1"><b>New year, new look.</b></h6>
+                        <h5 class="memo-heading" style="line-height: 1"><b>New year, new look.</b></h6>
+                        <h5 class="memo-heading" style="line-height: 1"><b>Happy scheduling.</b></h6>
+                        <h5 class="memo-heading" style="line-height: 1"><b>Happy scheduling.</b></h6>
+
+                        <br>
+                        <h6 class="cover-heading" style="line-height: 1"><b>- FALL 2015 -</b></h6>
+                        <h6 class="cover-heading" style="line-height: 1"><b>Disclaimer</b>: Results are not <em>guaranteed</em> to be accurate.</h6>
+                        
+                        <br>
+                        
+                        <div id="advertisement" class="advertisement">
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- [test for uva schedule] -->
+                            <ins class="adsbygoogle"
+                                style="display:inline-block;width:728px;height:90px"
+                                data-ad-client="ca-pub-7117171544040482"
+                                data-ad-slot="2498914074"></ins>
+                            <script>
+                                (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div>
+
+                        <div id="advertisement" class="advertisement">
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- uva schedule | me - EDITOR -->
+                            <ins class="adsbygoogle"
+                                style="display:inline-block;width:728px;height:90px"
+                                data-ad-client="ca-pub-7117171544040482"
+                                data-ad-slot="3523368478"></ins>
+                            <script>
+                                (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div>
+                        
+                        <div id="advertisement" class="advertisement">
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- uva schedule | me - LIVE -->
+                            <ins class="adsbygoogle"
+                                style="display:inline-block;width:728px;height:90px"
+                                data-ad-client="ca-pub-7117171544040482"
+                                data-ad-slot="1429356475"></ins>
+                            <script>
+                                (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div>
+                        
+                        <div id="advertisement" class="advertisement">
+                            <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                            <!-- uva schedule | me - 05312015 -->
+                            <ins class="adsbygoogle"
+                                style="display:inline-block;width:728px;height:90px"
+                                data-ad-client="ca-pub-7117171544040482"
+                                data-ad-slot="7336178876"></ins>
+                            <script>
+                                (adsbygoogle = window.adsbygoogle || []).push({});
+                            </script>
+                        </div>
+                        
+                        <script>
+                            (function() {
+                                var headings = $(".cover-heading");
+
+                                var exampleSchedules = $(".example");
+                                var index = Math.floor(Math.random() * 7);
+                                
+                                var forms = $(".form");
+                                
+                                var ads = $(".advertisement");
+                                
+                                var memos = $(".memo-heading");
+                                
+                                function showHeading() {
+                                    headings.eq(0).fadeIn(300);
+                                    headings.eq(1).fadeIn(400);
+                                    headings.eq(2).fadeIn(500);
+                                }
+                                function showNextSchedule() {
+                                    ++index;
+                                    exampleSchedules.eq(index % exampleSchedules.length)
+                                        .fadeIn(300)
+                                        .delay(2500)
+                                        .fadeOut(300, showNextSchedule);
+                                }
+                                function showForm() {
+                                    forms.eq(0).fadeIn(500);
+                                }
+                                
+                                function showAds() {
+                                    //ads.eq(0).fadeIn(100); //[test for uva schedule]
+                                    //ads.eq(1).fadeIn(100); //uva schedule | me - EDITOR
+                                    //ads.eq(2).fadeIn(100); //uva schedule | me - LIVE
+                                    ads.eq(3).fadeIn(100); //uva schedule | me - 05312015
+                                }
+                                
+                                function showMemos() {
+                                    var rand = Math.floor(Math.random() * 2);
+                                    memos.eq(rand).fadeIn(500);
+                                }
+                                
+                                showHeading();
+                                showNextSchedule();
+                                showForm();
+                                showAds();
+                                showMemos();
+                            })();
+                        </script>
+                        
+                    </div>
+                    
+                    <div class="mastfoot">
+                        <div class="inner">
+                            <br>
+                            Site created and maintained by <a href="mailto:ng3br@virginia.edu" style="color: #fff">Nikhil</a> and <a href="mailto:srikanth@virginia.edu" style="color: #fff">Srikanth</a>.
+                            <br>
+                            </b><em>Copyright &copy; 2015 &middot; All rights reserved.</em>
+                        </div>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </body>
+
+</html>
